@@ -1,10 +1,11 @@
 === WP-prettyPhoto ===
-Contributors: plpetitclerc
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=pL%40fusi0n%2eorg&lc=CA&item_name=Pier%2dLuc%20Petitclerc%20%2d%20Code%20Support&currency_code=CAD&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHostedGuest
 Tags: prettyphoto, jquery, lightbox, gallery, ajax, pictures, flash, video, animation, movie, mov, swf, youtube, iframe, modal, images, quicktime
 Requires at least: 2.7
 Tested up to: 3.0.1
-Stable tag: 1.6.2
+Stable tag: 2.0
+Author: Pier-Luc Petitclerc
+Author URI: http://blog.fusi0n.org
 
 prettyPhoto is a jQuery based lightbox clone. Not only does it support images, it also add support for videos, flash, YouTube, iFrame. It's a full blown media modal box. WP-prettyPhoto embeds those functionalities in WordPress.
 
@@ -15,7 +16,7 @@ prettyPhoto is a jQuery based lightbox clone. Not only does it support images, i
 If you like this plugin, please consider [giving your honest rating](http://wordpress.org/extend/plugins/wp-prettyphoto/), blogging/tweeting about it or [donating](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=pL%40fusi0n%2eorg&lc=CA&item_name=Pier%2dLuc%20Petitclerc%20%2d%20Code%20Support&currency_code=CAD&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHostedGuest).
 Thank you!
 
-Note: The plugin's documentation/help is located on [Pier-Luc's blog](https://fusi0n.org/wp-prettyphoto/technical-information-and-usage-instructions). A full version history (changelog) is available [here](http://wordpress.org/extend/plugins/wp-prettyphoto/changelog/). prettyPhoto's documentation is available [here](http://www.no-margin-for-errors.com/projects/prettyphoto-jquery-lightbox-clone/documentation/).
+Note: The plugin's documentation/help is located on [Pier-Luc's blog](http://blog.fusi0n.org/wp-prettyphoto/technical-information-and-usage-instructions). A full version history (changelog) is available [here](http://wordpress.org/extend/plugins/wp-prettyphoto/changelog/). prettyPhoto's documentation is available [here](http://www.no-margin-for-errors.com/projects/prettyphoto-jquery-lightbox-clone/documentation/).
 
 == Installation ==
 
@@ -37,7 +38,7 @@ For more information, see the ["Installing Plugins" article on the WordPress Cod
 
 = How do I use it? =
 
-See the plugin's [documentation](https://fusi0n.org/wp-prettyphoto/technical-information-and-usage-instructions), prettyPhoto's [project page](http://www.no-margin-for-errors.com/projects/prettyPhoto-jquery-lightbox-clone) and prettyPhoto's [support forums](http://forums.no-margin-for-errors.com/?CategoryID=2).
+See the plugin's [documentation](http://blog.fusi0n.org/wp-prettyphoto/technical-information-and-usage-instructions), prettyPhoto's [project page](http://www.no-margin-for-errors.com/projects/prettyPhoto-jquery-lightbox-clone) and prettyPhoto's [support forums](http://forums.no-margin-for-errors.com/?CategoryID=2).
 
 == Screenshots ==
 
@@ -46,6 +47,18 @@ See the plugin's [documentation](https://fusi0n.org/wp-prettyphoto/technical-inf
 3. WP-prettyPhoto showing an external site
 
 == ChangeLog ==
+
+= Version 2.0 =
+
+* Implemented features from [prettyPhoto 3.0](http://www.no-margin-for-errors.com/blog/2010/09/15/prettyphoto-3-0-is-live/):
+* Keyboard event bindings
+* Inline galleries
+* Multi-prettyPhoto window support
+* Slideshows
+* Custom markup
+* Added option to load jQuery (and thus prettyPhoto) load at the bottom of pages [Eduardo](http://fusi0n.org/wp-prettyphoto/wordpress-2-9x-compatibility-issue/comment-page-1#comment-2068)
+* Added option to load [Google's copy of jQuery](http://code.google.com/apis/libraries/devguide.html#jquery) ([Eduardo](http://fusi0n.org/wp-prettyphoto/wordpress-2-9x-compatibility-issue/comment-page-1#comment-2068))
+* Updated README for a.. better & more up to date version
 
 = Version 1.6.2 =
  

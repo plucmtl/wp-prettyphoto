@@ -1,11 +1,11 @@
 <?php
 /*
 Plugin Name: WP-prettyPhoto
-Plugin URI: https://fusi0n.org/category/wp-prettyphoto
+Plugin URI: http://fusi0n.org/category/wp-prettyphoto
 Description: prettyPhoto is a jQuery based lightbox clone. Not only does it support images, it also add support for videos, flash, YouTube, iFrame. It's a full blown media modal box. WP-prettyPhoto embeds those functionalities in WordPress.
-Version: 1.6.2
+Version: 2.0
 Author: Pier-Luc Petitclerc
-Author URI: https://fusi0n.org
+Author URI: http://twitter.com/pluc
 Text Domain: wp-prettyphoto
 License: http://creativecommons.org/licenses/by/3.0/
 */
@@ -21,16 +21,6 @@ class WP_prettyPhoto {
   public $opts = array();
 
   /**
-   * Switch to temporarily enable/disable parsing
-   * @var bool status
-   * @access public
-   * @static
-   * @since 1.5
-   * @see wppp_shortcode
-  */
-  static public $status = true;
-
-  /**
    * Class constructor
    * Sets default options, add filters, options page & shortcodes
    * @author Pier-Luc Petitclerc <pL@fusi0n.org>
@@ -43,17 +33,18 @@ class WP_prettyPhoto {
     $this->_buildOptions();
     $wpurl = WP_PLUGIN_URL.'/'.str_replace(basename( __FILE__), '', plugin_basename(__FILE__));
     if (!is_admin()) {
+	  //wp_enqueue_script( $handle, $src, $deps, $ver, $in_footer )
       if ($this->wppp_jsreplace == '1') {
         // jQuery - removing to make sure we're using 1.4.2
         wp_deregister_script('jquery');
-        wp_register_script('jquery', $wpurl.'js/jquery-1.4.2.min.js', false, '1.4.2');
-        wp_enqueue_script('jquery');
+        $this->wppp_script('jquery', $wpurl.'js/jquery-1.4.2.min.js', false, '1.4.2');
       }
+	  else { $this->wppp_script('jquery'); }
+
       // prettyPhoto JavaScript
-      wp_register_script('prettyphoto', $wpurl.'js/jquery.prettyPhoto.js', array('jquery'), '2.5.6');
-      wp_enqueue_script('prettyphoto');
+	  $this->wppp_script('prettyphoto', $wpurl.'js/jquery.prettyPhoto.js', array('jquery'), '3.0');
       // prettyPhoto CSS
-      wp_register_style('prettyphoto', $wpurl.'css/prettyPhoto.css', false, '2.5.6', 'screen');
+      wp_register_style('prettyphoto', $wpurl.'css/prettyPhoto.css', false, '3.0', 'screen');
       wp_enqueue_style('prettyphoto');
     }
     else {
@@ -62,15 +53,37 @@ class WP_prettyPhoto {
       add_action('admin_menu', array(&$this, 'wppp_hooks_admin'));
       add_action('plugin_action_links_'.plugin_basename(__FILE__), array(&$this, 'wppp_plugin_links'));
     }
-		if ($this->wppp_usecode  == '1') {
+	if ($this->wppp_usecode  == '1') {
       add_shortcode('ppo', array(&$this, 'wppp_shortcode'));
       add_shortcode('ppg', array(&$this, 'wppp_shortcode'));
     }
-		add_action('wp_head', array(&$this, 'wppp_styles'));
+	if ($this->wppp_footer == '1') {
+	  add_action('wp_footer', array(&$this, 'wppp_styles'));
+	}
+	else { add_action('wp_head', array(&$this, 'wppp_styles')); }
     if ($this->_doOutput()) {
       add_filter('the_content', array(&$this, 'wppp_content_hook'), 99, 1);
       add_filter('the_excerpt', array(&$this, 'wppp_content_hook'), 99, 1);
     }
+  }
+
+  /**
+   * Checks if script is registered and euqueues it
+   * @param string $script Script Name
+   * @param string $src Script Path
+   * @param array $deps Dependencies
+   * @param float $ver Version
+   * @return void
+   * @access public
+   * @since 2.0
+   * @author Pier-Luc Petitclerc <pL@fusi0n.org>
+   */
+  public function wppp_script($script, $src='', $deps=array(), $ver=false) {
+	// Check if script is registered
+	if (!wp_script_is($script, 'registered')) { wp_register_script($script, $src, $deps, $ver); }
+
+	if ($this->wppp_footer == '1') { wp_enqueue_script($script, $src, $deps, $ver, true); }
+	else { wp_enqueue_script($script, $src, $deps, $ver, false); }
   }
 
   /**
@@ -133,7 +146,7 @@ class WP_prettyPhoto {
   */
   public function wppp_activation_hook() {
     foreach ($this->opts as $k=>$v) {
-			if (get_option($k) === false) { add_option($k, $this->opts[$k]['default']); }
+	  if (get_option($k) === false) { add_option($k, $this->opts[$k]['default']); }
     }
   }
 
@@ -192,9 +205,9 @@ class WP_prettyPhoto {
   public function wppp_options_page() {
     $opts = $this->_getOptionsBySection();
     foreach ($opts as $optSect=>$optName) {
-			foreach ($optName as $opt) {
-				$$optSect .= $this->wppp_settings($opt);
-			}
+	  foreach ($optName as $opt) {
+		$$optSect .= $this->wppp_settings($opt);
+	  }
     }
     echo <<<EOHTML
     <div class="wrap">
@@ -250,21 +263,21 @@ EOHTML;
         case 'bigint':
           if ($k == 'wppp_callback') {
             $ret .= '<label for="'.$k.'">'.$this->opts[$k]['desc'].'</label><br /><textarea cols="30" rows="10" id="'.$k.'" name="'.$k.'">'.$opt.'</textarea>';
-						settings_fields('prettyphoto');
+			settings_fields('prettyphoto');
           }
           elseif ($k == 'wppp_picturecallback') {
             $ret .= '<label for="'.$k.'">'.$this->opts[$k]['desc'].'</label><br /><textarea cols="30" rows="10" id="'.$k.'" name="'.$k.'">'.$opt.'</textarea>';
           }
-					elseif (strpos($k, 'markup') !== false) {
-						$ret .= '<label for="'.$k.'">'.$this->opts[$k]['desc'].'</label><br /><textarea cols="30" rows="10" id="'.$k.'" name="'.$k.'">'.htmlentities($opt).'</textarea>';
-					}
+		  elseif (strpos($k, 'markup') !== false) {
+			$ret .= '<label for="'.$k.'">'.$this->opts[$k]['desc'].'</label><br /><textarea cols="30" rows="10" id="'.$k.'" name="'.$k.'">'.htmlentities($opt).'</textarea>';
+		  }
           else {
             $ret .= '<label for="'.$k.'">'.$this->opts[$k]['desc'].'</label> <input type="text" value="'.$opt.'" name="'.$k.'" id="'.$k.'">';
           }
           break;
       }
     }
-		$ret .= '<br />';
+	$ret .= '<br />';
     return $ret;
   }
 
@@ -417,16 +430,23 @@ EOHTML;
     $wppp_qmarkup	  = $this->wppp_qmarkup;
     $wppp_frmmarkup	  = $this->wppp_frmmarkup;
     $wppp_inmarkup	  = $this->wppp_inmarkup;
+	$wppp_gmarkup	  = $this->wppp_gmarkup;
+	$wppp_slideshow   = $this->wppp_slideshow;
+	$wppp_autoplay_slideshow = $this->wppp_autoplay_slideshow;
+	$wppp_width 	  = $this->wppp_width;
+	$wppp_height      = $this->wppp_height;
+	$wppp_overlay_gallery = $this->wppp_overlay_gallery;
+	$wppp_keyboard_shortcuts = $this->wppp_keyboard_shortcuts;
     $output = <<<EOHTML
-      <script type="text/javascript" charset="utf-8">
-        /* <![CDATA[ */
-        jQuery(document).ready(function($) {
-          $("a[rel^='{$wppp_rel}']").prettyPhoto({
-            animationSpeed: '{$wppp_speed}',
+	<script type="text/javascript" charset="utf-8">
+	/* <![CDATA[ */
+	jQuery(document).ready(function($) {
+		$("a[rel^='{$wppp_rel}']").prettyPhoto({
+		 animationSpeed: '{$wppp_speed}',
             padding: {$wppp_padding},
             opacity: {$wppp_opacity},
-            showTitle: {$wppp_title},
-            allowresize: {$wppp_resize},
+            show_title: {$wppp_title},
+            allow_resize: {$wppp_resize},
             counter_separator_label: '{$wppp_counterlabel}',
             theme: '{$wppp_theme}',
             wmode: '{$wppp_wmode}',
@@ -435,20 +455,28 @@ EOHTML;
             modal: {$wppp_modal},
             changepicturecallback: {$wppp_picturecallback},
             callback: {$wppp_callback},
-            markup: '{$wppp_markup}',
-            image_markup: '{$wppp_imarkup}',
-            flash_markup: '{$wppp_fmarkup}',
-            quicktime_markup: '{$wppp_qmarkup}',
-            iframe_markup: '{$wppp_frmmarkup}',
-            inline_markup: '{$wppp_inmarkup}'
-          });
-        });
-				/* ]]> */
-      </script>
+			slideshow: {$wppp_slideshow},
+			autoplay_slideshow: {$wppp_autoplay_slideshow},
+			default_width: {$wppp_width},
+			default_height: {$wppp_height},
+			overlay_gallery: {$wppp_overlay_gallery},
+			keyboard_shortcuts: {$wppp_keyboard_shortcuts},
+			markup: '{$wppp_markup}',
+			gallery_markup: '{$wppp_gmarkup}',
+			image_markup: '{$wppp_imarkup}',
+			flash_markup: '{$wppp_fmarkup}',
+			quicktime_markup: '$wppp_qmarkup',false, /* true/false */
+			iframe_markup: '{$wppp_frmmarkup}',
+			inline_markup: '{$wppp_inmarkup}',
+			custom_markup: '{$wppp_cmarkup}'
+		});
+	});
+	/* ]]> */
+	</script>
 EOHTML;
     echo $output;
   }
-  
+
 
   /**
    * Builds Options Array
@@ -470,7 +498,7 @@ EOHTML;
                                                      'name'    => __('Automate images'),
                                                      'desc'    => __('Automatic replacement of image links (BMP, GIF, JPG, JPEG, PNG)')),
                         'wppp_automate_swf' => array('default' => '1',
-                                                     'type'    => 'int',
+                                                     'type'    => 'int', /* false OR interval time in ms */
                                                      'section' => 'automate',
                                                      'name'    => __('Automate flash'),
                                                      'desc'    => __('Automatic replacement of Flash video links (SWF)')),
@@ -492,7 +520,7 @@ EOHTML;
                         'wppp_rel'          => array('default' => 'wp-prettyPhoto',
                                                      'type'    => 'string',
                                                      'section' => 'technical',
-                                                     'name'    => __('Rel value'),
+                                                     'name'    => __('Rel value'), /* false OR interval time in ms */
                                                      'desc'    => __('Value of the links\' "REL" attribute you want WP-prettyPhoto to look for')),
                         'wppp_speed'        => array('default' => 'normal',
                                                      'type'    => 'string',
@@ -583,7 +611,7 @@ EOHTML;
                                                                             <a class="pp_next" href="#">next</a> \
                                                                             <a class="pp_previous" href="#">previous</a> \
                                                                           </div> \
-                                                                          <div id="pp_full_res"></div> \
+                                                                          <div id="pp_full_res"></div /* false OR interval time in ms */> \
                                                                           <div class="pp_details clearfix"> \
                                                                             <a class="pp_close" href="#">Close</a> \
                                                                             <p class="pp_description"></p> \
@@ -631,21 +659,51 @@ EOHTML;
                                                       'name'    => __('iFrame Markup'),
                                                       'desc'    => __('iFrame Markup')),
                         'wppp_inmarkup'     => array('default' =>'<div class="pp_inline clearfix">{content}</div>',
+                                                     'type'    => 'string',
+                                                     'section' => 'technical',
+                                                     'name'    => __('Inline Markup'),
+                                                     'desc'    => __('Inline Markup')),
+						'wppp_gmarkup'		=> array('default' => '<div class="pp_gallery"> \
+																   <a href="#" class="pp_arrow_previous">Previous</a> \
+																   <ul> \
+																 	  {gallery} \
+																   </ul> \
+																   <a href="#" class="pp_arrow_next">Next</a> \
+																  </div>',
+													  'type'    => 'string',
+													  'section' => 'technical',
+													  'name'    => __('Gallery Markup'),
+													  'desc'    => __('Gallery Markup')),
+                        'wppp_picturecallback'=>array('default'=> 'function(){}',
                                                       'type'    => 'string',
                                                       'section' => 'technical',
-                                                      'name'    => __('Inline Markup'),
-                                                      'desc'    => __('Inline Markup')),
-                        'wppp_picturecallback'=>array('default'=> 'function(){}',
-                                                     'type'    => 'string',
-                                                     'section' => 'technical',
-                                                     'name'    => __('Picture Callback'),
-                                                     'desc'    => __('Picture Callback function (MUST be "function(){YOUR_JS_CODE_HERE}")'),
+                                                      'name'    => __('Picture Callback'),
+                                                      'desc'    => __('Picture Callback function (MUST be "function(){YOUR_JS_CODE_HERE}")'),
                                                      ),
-                        'wppp_callback'      => array('default'=> 'function(){}',
-                                                     'type'    => 'string',
-                                                     'section' => 'technical',
-                                                     'name'    => __('Callback function'),
-                                                     'desc'    => __('Callback function (MUST be "function(){YOUR_JS_CODE_HERE}")')),
+                        'wppp_callback'      => array('default'=> 'function(){}', /* false OR interval time in ms */
+                                                      'type'    => 'string',
+                                                      'section' => 'technical',
+                                                      'name'    => __('Callback function'),
+                                                      'desc'    => __('Callback function (MUST be "function(){YOUR_JS_CODE_HERE}")')),
+						'wppp_footer'		 => array('default'=> '0',
+													  'type'   => 'int',
+													  'section'=> 'technical',
+													  'name'   => __('Load JavaScript in Footer'),
+													  'desc'  => __('Load JavaScript in footer')),
+						'wppp_slideshow'	 => array('default' => '0',
+													  'type'    => 'int',
+													  'section' => 'appearance',
+													  'name'    => __('Slideshow'),
+													  'desc'    => __('Slideshow')),
+						'wppp_autoplay_slideshow'=> array('default' => '0',
+														  'type' => 'int',
+														  'section' => 'appearance',
+														  'name' => __('Autoplay Slideshow'),
+														  'desc' => __('Autoplay Slideshow')),
+						'wppp_width' 		=> array(),
+						'wppp_height'		=> array(),
+						'wppp_overlay_gallery'=> array(),
+						'wppp_keyboard_shortcuts' => array()
                   );
     if ($init === true) { $this->wppp_activation_hook(); }
   }
